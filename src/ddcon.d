@@ -393,64 +393,6 @@ void SetPos(int x, int y)
 }*/
 
 /*******************************************************************
- * Titles
- *******************************************************************/
-
-/// Set session title
-/// Param: value = Title to set
-@property void Title(string value)
-{
-    version (Windows)
-    {
-        // Sanity check
-        if (value[$-1] != '\0') value ~= '\0';
-        SetConsoleTitleA(&value[0]);
-    }
-}
-
-/// Set session title
-/// Param: value = Title to set
-@property void Title(wstring value)
-{
-    version (Windows)
-    {
-        // Sanity check
-        if (value[$-1] != '\0') value ~= '\0';
-        SetConsoleTitleW(&value[0]);
-    }
-}
-
-/// Get session title
-/// Returns: Console title
-@property string Title()
-{
-    version (Windows)
-    {
-        char[255] buf;
-        return buf[0..GetConsoleTitleA(&buf[0], MAX_PATH)].idup;
-    }
-    else 
-    {
-        return null;
-    }
-}
-
-/// Get session title
-/// Returns: Console title
-@property wstring TitleW()
-{
-    version (Windows)
-    {
-        wchar[255] buf;
-        return buf[0..GetConsoleTitleW(&buf[0], MAX_PATH)].idup;
-    }
-    else 
-    {
-        return null;
-    }
-}
-
-/*******************************************************************
  * Input
  *******************************************************************/
 
@@ -540,79 +482,9 @@ KeyInfo ReadKey(bool echo = false)
     return k;
 }
 
-RawEvent ReadGlobal()
-{
-    version (Windows)
-    {
-        RawEvent r;
-
-        INPUT_RECORD ir;
-        DWORD num = 0;
-        if (ReadConsoleInput(hIn, &ir, 1, &num))
-        {
-            r.Type = cast(EventType)ir.EventType;
-
-            if (ir.KeyEvent.bKeyDown)
-            {
-                const DWORD state = ir.KeyEvent.dwControlKeyState;
-                r.Key.alt   = (state & ALT_PRESSED)   != 0;
-                r.Key.ctrl  = (state & CTRL_PRESSED)  != 0;
-                r.Key.shift = (state & SHIFT_PRESSED) != 0;
-                r.Key.keyChar  = ir.KeyEvent.AsciiChar;
-                r.Key.keyCode  = ir.KeyEvent.wVirtualKeyCode;
-                r.Key.scanCode = ir.KeyEvent.wVirtualScanCode;
-            }
-
-            r.Mouse.Location.X = cast(ushort)ir.MouseEvent.dwMousePosition.X;
-            r.Mouse.Location.Y = cast(ushort)ir.MouseEvent.dwMousePosition.Y;
-            r.Mouse.Buttons = cast(ushort)ir.MouseEvent.dwButtonState;
-            r.Mouse.State = cast(ushort)ir.MouseEvent.dwControlKeyState;
-            r.Mouse.Type = cast(ushort)ir.MouseEvent.dwEventFlags;
-
-            r.Size.Width = ir.WindowBufferSizeEvent.dwSize.X;
-            r.Size.Height = ir.WindowBufferSizeEvent.dwSize.Y;
-        }
-
-        return r;
-    }
-    else version (Posix)
-    { //TODO: RawEvent (Posix)
-        RawEvent r;
-
-        return r;
-    }
-}
-
-/*******************************************************************
- * Handlers
- *******************************************************************/
-
-/*void SetCtrlHandler(void function() f)
-{ //TODO: Ctrl handler
-
-}*/
-
 /*******************************************************************
  * Emunerations
  *******************************************************************/
-
-enum EventType : ushort {
-    Key = 1, Mouse = 2, Resize = 4
-}
-
-enum MouseButton : ushort { // Windows compilant
-    Left = 1, Right = 2, Middle = 4, Mouse4 = 8, Mouse5 = 16
-}
-
-enum MouseState : ushort { // Windows compilant
-    RightAlt = 1, LeftAlt = 2, RightCtrl = 4,
-    LeftCtrl = 8, Shift = 0x10, NumLock = 0x20,
-    ScrollLock = 0x40, CapsLock = 0x80, EnhancedKey = 0x100
-}
-
-enum MouseEventType { // Windows compilant
-    Moved = 1, DoubleClick = 2, Wheel = 4, HorizontalWheel = 8
-}
 
 /// Key codes mapping.
 enum Key : ushort {
@@ -766,14 +638,6 @@ enum Key : ushort {
  * Structs
  *******************************************************************/
 
-struct RawEvent
-{
-    EventType Type;
-    KeyInfo Key;
-    MouseInfo Mouse;
-    WindowSize Size;
-}
-
 /// Key information structure
 // ala C#
 struct KeyInfo
@@ -790,18 +654,4 @@ struct KeyInfo
     bool alt;
     /// If SHIFT was held down.
     bool shift;
-}
-
-struct MouseInfo
-{
-    struct ScreenLocation { ushort X, Y; }
-    ScreenLocation Location;
-    ushort Buttons;
-    ushort State;
-    ushort Type;
-}
-
-struct WindowSize
-{
-    ushort Width, Height;
 }

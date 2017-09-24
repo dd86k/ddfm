@@ -9,7 +9,8 @@ import std.format : format;
 //TODO: search
 //TODO: Folder first (buffer for file/links types)
 
-void init()
+/// Start ddfm
+void Start()
 {
     InitConsole;
     SetColor(defaultColor);
@@ -37,11 +38,10 @@ void init()
             case Key.UpArrow:
                 if (userSelection - 1 >= 0) {
                     --userSelection;
-                    Update;
                 } else {
                     userSelection = cdTotal - 1;
-                    Update;
                 }
+                Update;
                 break;
             
             case Key.Home:
@@ -114,16 +114,16 @@ bool getEntry(DirEntry* e)
  */
 
 // DEFAULT
-enum defaultColor = FgColor.LightCyan | BgColor.Blue;
+enum defaultColor = FgColor.LightCyan | BgColor.Blue; /// Default color
 // FILE
-enum fileColor = FgColor.LightCyan | BgColor.Blue;
-enum fileSelectColor = FgColor.Black | BgColor.Cyan;
+enum fileColor = FgColor.LightCyan | BgColor.Blue; /// File color
+enum fileSelectColor = FgColor.Black | BgColor.Cyan; /// Selected file color
 // FOLDER
-enum dirColor = FgColor.LightGreen | BgColor.Blue;
-enum dirSelectColor = FgColor.Black | BgColor.Green;
+enum dirColor = FgColor.LightGreen | BgColor.Blue; /// Directory color
+enum dirSelectColor = FgColor.Black | BgColor.Green; /// Selected directory color
 // SYMLINK
-enum linkColor = FgColor.LightPurple | BgColor.Blue;
-enum linkSelectColor = FgColor.Black | BgColor.Purple;
+enum linkColor = FgColor.LightPurple | BgColor.Blue; /// Symlink color
+enum linkSelectColor = FgColor.Black | BgColor.Purple; /// Select symlink color
 
 
 /*
@@ -152,6 +152,7 @@ void Update()
         if (--h >= 0)
         {
             with (entry) {
+                //TODO: Use getAttributes instead?
                 if (s == userSelection) { // SELECTION
                     if (isSymlink)
                         SetColor(FgColor.Black | BgColor.LightGreen);
@@ -168,11 +169,17 @@ void Update()
                 } else { // DIRECTORY
                     SetColor(dirColor);
                 }
-                string fname = name;
-                if (fname.length > w)
-                    writefln(" %-*s", w, fname[0..w]);
-                else
-                    printf(" %-*s\n", w, fname.toStringz);
+
+
+                char* p = cast(char*)&name[0];
+                size_t l = name.length;
+                if (l > w) {
+                    p[w] = '\0';
+                    printf(" %-*s", w, p);
+                } else {
+                    p[l] = '\0';
+                    printf(" %-*s\n", w, p);
+                }
             }
             ++s;
         }
