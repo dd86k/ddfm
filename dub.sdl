@@ -1,0 +1,6 @@
+name "ddfm"
+description "Small terminal file manager."
+authors "dd86k"
+copyright "Copyright © 2017, dd"
+license "MIT"
+
