@@ -1,10 +1,12 @@
 module ddfm;
 
 import std.stdio;
+import core.stdc.stdio : printf;
 import ddcon;
 import std.path;
 import std.file;
 import std.format : format;
+import utils;
 
 //TODO: search
 //TODO: Folder first (buffer for file/links types)
@@ -140,8 +142,6 @@ private int cdTotal;
 private long totalSize;
 void Update()
 {
-    import core.stdc.stdio : printf;
-    import std.string : toStringz;
     int h = WindowHeight - 2;
     int w = WindowWidth  - 1;
     SetPos(0, 1);
@@ -155,7 +155,7 @@ void Update()
                 //TODO: Use getAttributes instead?
                 if (s == userSelection) { // SELECTION
                     if (isSymlink)
-                        SetColor(FgColor.Black | BgColor.LightGreen);
+                        SetColor(linkSelectColor);
                     else if (isFile) {
                         SetColor(fileSelectColor);
                         totalSize += size;
@@ -223,8 +223,7 @@ void BottomRefresh()
 
 void BottomUpdate()
 {
-    import utils : formatsize;
     SetPos(0, WindowHeight - 1);
     SetColor(defaultColor);
-    writef("  %d Element(s) | %s", cdTotal, formatsize(totalSize));
+    writef("  %d element(s)", cdTotal);
 }
